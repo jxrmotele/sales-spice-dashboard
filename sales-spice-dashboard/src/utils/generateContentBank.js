@@ -121,10 +121,10 @@ Return ONLY a JSON array with exactly ${count} objects, no markdown, no explanat
 
 export async function generateContentBank({ bankLabel, offerDetails, clientId, bankKey, count = 10 }) {
   const ideasBank = loadIdeasBank()
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = localStorage.getItem('salesSpice_anthropicApiKey') || import.meta.env.VITE_ANTHROPIC_API_KEY
 
   if (!apiKey) {
-    throw new Error('VITE_ANTHROPIC_API_KEY is not set.')
+    throw new Error('No API key found. Please add your Anthropic API key on the home screen.')
   }
 
   let response

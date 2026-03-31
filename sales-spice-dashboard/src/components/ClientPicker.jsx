@@ -1,6 +1,27 @@
+import { useState } from 'react'
 import { T, winCard, winTitleBar, winBtn, PHASE_COLORS } from '../theme'
 
+const API_KEY_STORAGE = 'salesSpice_anthropicApiKey'
+
 export default function ClientPicker({ clients, onSelect, onNew, onDelete }) {
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(API_KEY_STORAGE) || '')
+  const [apiKeyInput, setApiKeyInput] = useState('')
+  const [showApiInput, setShowApiInput] = useState(false)
+
+  function saveApiKey() {
+    const trimmed = apiKeyInput.trim()
+    if (!trimmed) return
+    localStorage.setItem(API_KEY_STORAGE, trimmed)
+    setApiKey(trimmed)
+    setApiKeyInput('')
+    setShowApiInput(false)
+  }
+
+  function removeApiKey() {
+    localStorage.removeItem(API_KEY_STORAGE)
+    setApiKey('')
+    setShowApiInput(false)
+  }
   return (
     <div style={styles.page}>
       {/* Header bar */}
@@ -72,6 +93,43 @@ export default function ClientPicker({ clients, onSelect, onNew, onDelete }) {
             })}
           </div>
         )}
+        {/* ── API Key section ── */}
+        <div style={styles.apiSection}>
+          <div style={styles.apiRow}>
+            <div style={styles.apiLabel}>
+              ✦ Anthropic API Key
+              {apiKey && <span style={styles.apiSaved}> ✓ saved</span>}
+            </div>
+            {apiKey ? (
+              <div style={styles.apiActions}>
+                <span style={styles.apiMasked}>sk-ant-···{apiKey.slice(-6)}</span>
+                <button style={styles.apiLinkBtn} onClick={removeApiKey}>Remove</button>
+              </div>
+            ) : (
+              <button style={styles.apiLinkBtn} onClick={() => setShowApiInput(v => !v)}>
+                {showApiInput ? 'Cancel' : 'Add key'}
+              </button>
+            )}
+          </div>
+          {showApiInput && (
+            <div style={styles.apiInputRow}>
+              <input
+                type="password"
+                placeholder="sk-ant-api03-..."
+                value={apiKeyInput}
+                onChange={e => setApiKeyInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && saveApiKey()}
+                style={styles.apiInput}
+                autoFocus
+              />
+              <button style={styles.apiSaveBtn} onClick={saveApiKey}>Save</button>
+            </div>
+          )}
+          <div style={styles.apiHint}>
+            Required for AI content generation. Your key is stored only in your browser and never sent to our servers.
+            Get yours at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{ color: T.blueDark }}>console.anthropic.com</a>.
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -248,5 +306,78 @@ const styles = {
     fontWeight: 800,
     fontFamily: T.body,
     cursor: 'pointer',
+  },
+  apiSection: {
+    marginTop: 56,
+    borderTop: `1px solid ${T.border}`,
+    paddingTop: 24,
+  },
+  apiRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  apiLabel: {
+    fontFamily: T.body,
+    fontSize: 13,
+    fontWeight: 700,
+    color: T.indigo,
+  },
+  apiSaved: {
+    color: T.mintDark,
+    fontWeight: 600,
+  },
+  apiActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  apiMasked: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: T.muted,
+  },
+  apiLinkBtn: {
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    fontFamily: T.body,
+    fontSize: 12,
+    fontWeight: 600,
+    color: T.blueDark,
+  },
+  apiInputRow: {
+    display: 'flex',
+    gap: 8,
+    marginBottom: 8,
+  },
+  apiInput: {
+    flex: 1,
+    padding: '8px 12px',
+    borderRadius: 6,
+    border: `1px solid ${T.border}`,
+    fontFamily: 'monospace',
+    fontSize: 13,
+    color: T.indigo,
+    outline: 'none',
+  },
+  apiSaveBtn: {
+    padding: '8px 16px',
+    borderRadius: 6,
+    border: `1px solid ${T.mintDark}`,
+    background: T.mint,
+    color: T.indigo,
+    fontSize: 13,
+    fontWeight: 700,
+    fontFamily: T.body,
+    cursor: 'pointer',
+  },
+  apiHint: {
+    fontFamily: T.body,
+    fontSize: 12,
+    color: T.muted,
+    lineHeight: 1.5,
   },
 }

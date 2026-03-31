@@ -139,10 +139,10 @@ First line must be a standalone scroll-stopper. End with a soft CTA, a reflectiv
 
 export async function generateTaskContent({ phase, task, offerDetails }) {
   const ideasBank = loadIdeasBank()
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = localStorage.getItem('salesSpice_anthropicApiKey') || import.meta.env.VITE_ANTHROPIC_API_KEY
 
   if (!apiKey) {
-    throw new Error('VITE_ANTHROPIC_API_KEY is not set. Add it to .env.local and restart the dev server.')
+    throw new Error('No API key found. Please add your Anthropic API key on the home screen.')
   }
 
   const name = offerDetails?.yourName || 'the coach'
@@ -222,9 +222,9 @@ No markdown fences. No explanation. Nothing else.`,
 // ─── Shared API helper (returns plain text) ───────────────────────────────────
 
 async function callClaudeText(systemPrompt, userPrompt, maxTokens = 2000) {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = localStorage.getItem('salesSpice_anthropicApiKey') || import.meta.env.VITE_ANTHROPIC_API_KEY
   if (!apiKey) {
-    throw new Error('VITE_ANTHROPIC_API_KEY is not set. Add it to .env.local and restart the dev server.')
+    throw new Error('No API key found. Please add your Anthropic API key on the home screen.')
   }
 
   let response

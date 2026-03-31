@@ -3,9 +3,9 @@
 // using Claude. Returns a flat object keyed to the MESSAGING_CODEX_SECTIONS fields.
 
 export async function generateMessagingCodex(offerDetails) {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = localStorage.getItem('salesSpice_anthropicApiKey') || import.meta.env.VITE_ANTHROPIC_API_KEY
   if (!apiKey) {
-    throw new Error('VITE_ANTHROPIC_API_KEY is not set. Add it to .env.local and restart.')
+    throw new Error('No API key found. Please add your Anthropic API key on the home screen.')
   }
 
   const od = offerDetails || {}
