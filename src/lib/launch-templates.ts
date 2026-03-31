@@ -21,6 +21,12 @@ export type LaunchPhase = {
   tasks: LaunchTask[]
 }
 
+export type KeyDates = {
+  launchStart?: string
+  cartOpen?: string
+  cartClose?: string
+}
+
 export type LaunchTemplate = {
   id: string
   name: string
