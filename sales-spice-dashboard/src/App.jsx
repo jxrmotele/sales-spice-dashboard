@@ -227,11 +227,6 @@ export default function App() {
 
   // No client selected → if only one client exists, auto-load them; otherwise show picker
   if (!activeClientId) {
-    if (clients.length === 1) {
-      // Auto-select the single client without showing the picker
-      setActiveClientId(clients[0].id)
-      return null
-    }
     return (
       <ClientPicker
         clients={clients}
