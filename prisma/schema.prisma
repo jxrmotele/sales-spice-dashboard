@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  hashedPassword String
+  role           String    @default("COACH") // ADMIN or COACH
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  clients        Client[]  @relation("AssignedCoach")
+
+  @@map("users")
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  fullName       String
+  email          String    @unique
+  phone          String?
+  startDate      DateTime  @default(now())
+  packageTier    String?
+  status         String    @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED
+  assignedCoachId String
+  assignedCoach  User      @relation("AssignedCoach", fields: [assignedCoachId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  contentEntries   ContentEntry[]
+  aiSummaries      AiSummary[]
+  activityLogs     ActivityLog[]
+  offerDetails     OfferDetails?
+  launchPlan       LaunchPlan?
+  generatedContent GeneratedContent[]
+
+  @@map("clients")
+}
+
+model ContentEntry {
+  id            String      @id @default(cuid())
+  clientId      String
+  client        Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contentType   String      // FORM, TRANSCRIPT, THREAD, NOTE
+  contentBody   String
+  sourceLabel   String
+  matchMethod   String?     // EMAIL, NAME, MANUAL
+  createdAt     DateTime    @default(now())
+
+  activityLog   ActivityLog?
+
+  @@index([clientId, contentType])
+  @@index([clientId, createdAt])
+  @@map("content_entries")
+}
+
+model AiSummary {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  currentFocus    String
+  milestones      String
+  nextSteps       String
+  generatedAt     DateTime @default(now())
+
+  @@index([clientId, generatedAt])
+  @@map("ai_summaries")
+}
+
+model UnmatchedEntry {
+  id                  String   @id @default(cuid())
+  email               String?
+  fullName            String?
+  contentType         String   // FORM, TRANSCRIPT, THREAD, NOTE
+  contentBody         String
+  sourceLabel         String
+  assignedCoachEmail  String?
+  suggestedClientIds  String   @default("[]") // JSON array of client IDs
+  matchAttemptDetails String?
+  createdAt           DateTime @default(now())
+
+  @@map("unmatched_entries")
+}
+
+model ActivityLog {
+  id              String       @id @default(cuid())
+  clientId        String
+  client          Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  action          String
+  contentEntryId  String?      @unique
+  contentEntry    ContentEntry? @relation(fields: [contentEntryId], references: [id], onDelete: SetNull)
+  source          String
+  matchMethod     String?      // EMAIL, NAME, MANUAL
+  createdAt       DateTime     @default(now())
+
+  @@index([clientId, createdAt])
+  @@map("activity_logs")
+}
+
+model AppSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("app_settings")
+}
+
+// Stores all OCT + Messaging Codex fields per client as a JSON blob
+model OfferDetails {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  data      String   @default("{}") // JSON: all offer clarity + messaging codex fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("offer_details")
+}
+
+// Stores the launch plan for a client (template choice, key dates, task completions)
+model LaunchPlan {
+  id              String   @id @default(cuid())
+  clientId        String   @unique
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  templateId      String   // 'alpha' | 'arena'
+  keyDates        String   @default("{}") // JSON: { launchStart?, cartOpen?, cartClose? }
+  taskCompletions String   @default("{}") // JSON: { [taskId]: boolean }
+  leadMagnetType  String?  // 'training' | 'playbook' | 'podcast'
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("launch_plans")
+}
+
+// Stores AI-generated content (emails, social posts, sales page, podcast scripts)
+model GeneratedContent {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  contentType String   // 'email', 'social', 'sales-page', 'podcast'
+  key         String   // e.g. 'waitlist-drive', 'pre-launch', 'full-page', 'episode-1'
+  content     String   // the generated content text
+  createdAt   DateTime @default(now())
+
+  @@index([clientId, contentType])
+  @@map("generated_content")
+}

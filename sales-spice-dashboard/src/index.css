@@ -1,0 +1,60 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: #F8F9FA;
+  background-image: none;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+button {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+textarea {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+textarea:focus {
+  border-color: #6040a8 !important;
+  box-shadow: 0 0 0 3px rgba(96, 64, 168, 0.12) !important;
+}
+
+input:focus {
+  border-color: #6040a8 !important;
+  outline: none;
+}
+
+button:hover {
+  filter: brightness(1.04);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .task-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
